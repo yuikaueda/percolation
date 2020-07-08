@@ -73,6 +73,20 @@ double crossing_probability(void) {
   return 0.0;
 }
 
+double crossing_probability2(void) {
+  for (int ix1 = 0; ix1 < L; ix1++) {
+    int i = find(pos2index(0, ix1));
+    int ci = find(i);
+    for (int ix2 = 0; ix2 < L; ix2++) {
+      int j = find(pos2index(L-1, ix2));
+      int cj = find(j);
+      if (ci == cj)
+        return 1.0;
+    }
+  }
+  return 0.0;
+}
+
 double percolation_probability(void) {
   std::vector<int> size(N, 0);
   for (int i = 0; i < N; i++) {
@@ -83,7 +97,7 @@ double percolation_probability(void) {
   return static_cast<double>(max) / N;
 }
 
-double mc_cp(double p) {
+double mc_cp_y(double p) {
   const int observe_loop = 1000;
   std::mt19937 mt;
   double cp = 0;
@@ -110,6 +124,19 @@ double mc_cp(double p) {
     }
   fprintf(fp, "p\tcp\tpp");
   fclose(fp);*/
+  return cp;
+}
+
+double mc_cp_x(double p) {
+  const int observe_loop = 1000;
+  std::mt19937 mt;
+  double cp = 0;
+
+  for (int i = 0; i < observe_loop; i++) {
+    one_step(p, mt);
+    cp += crossing_probability2();
+  }
+  cp /= static_cast<double>(observe_loop);
   return cp;
 }
 
@@ -147,20 +174,32 @@ int main(void) {
   int ND = 50;
   int size = 32;
   init(size);
-  double cp;
+  double cp_y, cp_x;
   double pp;
 
   std::ofstream fp;
   std::string filename;
-  filename = "percolation.dat";
+  filename = "percolation_pp.dat";
   fp.open(filename, std::ios::out);
+  fp << "p" << "\t" << "cp_y" << "\t" << "cp_x" << std::endl;
+
+  std::ofstream fp1;
+  std::string filename1;
+  filename1 = "percolation_cp.dat";
+  fp1.open(filename1, std::ios::out);
+  fp1 << "p" << "\t" << "pp" << std::endl;
+
   for (int i = 0; i <= ND; i++) {
     double p = static_cast<double>(i) / ND;
     //mc(p);
-    cp = mc_cp(p);
+    cp_y = mc_cp_y(p);
+    cp_x = mc_cp_x(p);
+    fp << "p" << "\t" << cp_y << "\t" << cp_x << std::endl;
+
     pp = mc_pp(p);
-    fp << p << "\t" << cp << "\t" << pp << std::endl;
+    fp1 << p << "\t" << pp << std::endl;
   }
   fp.close();
+  fp1.close();
 }
 

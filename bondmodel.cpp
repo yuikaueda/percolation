@@ -12,6 +12,7 @@
 
 int L; // System Size
 int N; // Number of Sites
+double p1 = 0.15;//syokikakuritu
 
 std::vector<int> parent;
 
@@ -53,8 +54,8 @@ void one_step(double p, std::mt19937 &mt) {
   for (int iy = 0; iy < L - 1; iy++) {
     for (int ix = 0; ix < L - 1; ix++) {
       int i = pos2index(ix, iy);
-      connect(i, pos2index(ix + 1, iy), p, mt);
-      connect(i, pos2index(ix, iy + 1), p, mt);
+      connect(i, pos2index(ix + 1, iy), p, mt); //right
+      connect(i, pos2index(ix, iy + 1), p1, mt); //down
     }
   }
 }
@@ -171,33 +172,37 @@ double mc_pp(double p) {
 }
 
 int main(void) {
-  int ND = 50;
-  int size = 32;
+  //int ND = 50;
+  int ND =45;
+  //int size = 32;
+  int size = 40;
   init(size);
   double cp_y, cp_x;
   double pp;
 
   std::ofstream fp;
   std::string filename;
-  filename = "percolation_pp.dat";
+  filename = "percolation_2cp40.dat";
   fp.open(filename, std::ios::out);
-  fp << "p" << "\t" << "cp_y" << "\t" << "cp_x" << std::endl;
+  fp << "f" << "\t" << "cp_y" << "\t" << "cp_x" << std::endl;
 
   std::ofstream fp1;
   std::string filename1;
-  filename1 = "percolation_cp.dat";
+  filename1 = "percolation_2pp40.dat";
   fp1.open(filename1, std::ios::out);
-  fp1 << "p" << "\t" << "pp" << std::endl;
+  fp1 << "f" << "\t" << "pp" << std::endl;
 
   for (int i = 0; i <= ND; i++) {
-    double p = static_cast<double>(i) / ND;
+    //double p = static_cast<double>(i) / ND;
+    double f = 0.17*static_cast<double>(i);
+    double p = - (0.046875)*f*f+0.375*f+0.15;
     //mc(p);
     cp_y = mc_cp_y(p);
     cp_x = mc_cp_x(p);
-    fp << "p" << "\t" << cp_y << "\t" << cp_x << std::endl;
+    fp << f << "\t" << cp_y << "\t" << cp_x << std::endl;
 
     pp = mc_pp(p);
-    fp1 << p << "\t" << pp << std::endl;
+    fp1 << f << "\t" << pp << std::endl;
   }
   fp.close();
   fp1.close();
